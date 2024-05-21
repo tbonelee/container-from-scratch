@@ -40,18 +40,19 @@ func child() {
 
 	cg()
 
-	syscall.Sethostname([]byte("container")) // 새로운 namespace에 들어왔으므로 hostname을 변경해도 host의 hostname은 변경되지 않음
-	syscall.Chroot("/home/ubuntu/container") // chroot를 통해 root directory를 변경
-	syscall.Chdir("/")
-	syscall.Mount("proc", "proc", "proc", 0, "") // src(device), target(dir), fstype, flags, data (src를 target에 mount)
-
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	must(syscall.Sethostname([]byte("container"))) // 새로운 namespace에 들어왔으므로 hostname을 변경해도 host의 hostname은 변경되지 않음
+	must(syscall.Chroot("/home/ubuntu/container")) // chroot를 통해 root directory를 변경
+	must(syscall.Chdir("/"))
+	must(syscall.Mount("proc", "proc", "proc", 0, "")) // src(device), target(dir), fstype, flags, data (src를 target에 mount)
+
 	must(cmd.Run())
 
-	syscall.Unmount("/proc", 0) // unmount proc
+	must(syscall.Unmount("/proc", 0)) // unmount proc
 
 }
 
