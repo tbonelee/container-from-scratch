@@ -51,6 +51,8 @@ func child() {
 	cmd.Stderr = os.Stderr
 	must(cmd.Run())
 
+	syscall.Unmount("/proc", 0) // unmount proc
+
 }
 
 func cg() {
